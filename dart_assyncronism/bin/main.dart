@@ -3,7 +3,7 @@ import 'dart:convert';
 
 void main() {
   print('Hello, World!');
-  requestDataAsync();
+  requestLivros();
 }
 
 void requestData() {
@@ -21,7 +21,9 @@ void requestData() {
     print(mapCarla["balance"]);
   });
 
-  print('Última coisa a acontecer'); //Não é a última coisa a acontecer em tempo de execução
+  print(
+    'Última coisa a acontecer',
+  ); //Não é a última coisa a acontecer em tempo de execução
 }
 
 void requestDataAsync() async {
@@ -38,4 +40,18 @@ void requestDataAsync() async {
   }
 
   print(nomeSelecionados);
+}
+
+void requestLivros() async {
+  String url =
+      'https://raw.githubusercontent.com/alura-cursos/dart_assincronismo_api/aula05/.json/books.json';
+
+  Response response = await get(Uri.parse(url));
+  List<dynamic> listResponse = json.decode(response.body);
+  for (dynamic livro in listResponse) {
+    Map<String, dynamic> atual = livro as Map<String, dynamic>;
+    if (atual["author"] == "Jorge Amado") {
+      print(atual["title"]);
+    }
+  }
 }
