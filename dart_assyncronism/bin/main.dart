@@ -1,14 +1,21 @@
 import 'package:http/http.dart';
 import 'dart:convert';
+import '../lib/api_key.dart';
 
 void main() {
   print('Hello, World!');
-  requestLivros();
+  sendDataAsync({
+    "id": "NEW001",
+    "name": "Marcos",
+    "lastName": "Souza",
+    "balance": 350,
+  });
+  //requestLivros();
 }
 
 void requestData() {
   String url =
-      "https://gist.githubusercontent.com/MVNSouza/6bfdfa496b5dae5a395c318ae9a4189d/raw/803ff5bcdf8e57f2effcc26f91d4dbc227bf6cc0/gistfile1.txt";
+      "https://gist.githubusercontent.com/MVNSouza/6bfdfa496b5dae5a395c318ae9a4189d/raw/243aacc930bc646dfb8d597eb18145bedfe886e4/account.json";
   Future<Response> futureResponse = get(Uri.parse(url));
   futureResponse.then((Response response) {
     print(response);
@@ -26,20 +33,11 @@ void requestData() {
   ); //Não é a última coisa a acontecer em tempo de execução
 }
 
-void requestDataAsync() async {
+Future<List<dynamic>> requestDataAsync() async {
   String url =
-      "https://gist.githubusercontent.com/MVNSouza/6bfdfa496b5dae5a395c318ae9a4189d/raw/803ff5bcdf8e57f2effcc26f91d4dbc227bf6cc0/gistfile1.txt";
+      "https://gist.githubusercontent.com/MVNSouza/6bfdfa496b5dae5a395c318ae9a4189d/raw/243aacc930bc646dfb8d597eb18145bedfe886e4/account.json";
   Response response = await get(Uri.parse(url));
-  List<dynamic> listResponse = json.decode(response.body);
-  List<String> nomeSelecionados = [];
-  for (dynamic pessoa in listResponse) {
-    Map<String, dynamic> selecionada = pessoa as Map<String, dynamic>;
-    if (selecionada["balance"] <= 200) {
-      nomeSelecionados.add(selecionada["name"]);
-    }
-  }
-
-  print(nomeSelecionados);
+  return json.decode(response.body);
 }
 
 void requestLivros() async {
@@ -54,4 +52,24 @@ void requestLivros() async {
       print(atual["title"]);
     }
   }
+}
+
+void sendDataAsync(Map<String, dynamic> mapAccont) async {
+  List<dynamic> listAcconts = await requestDataAsync();
+  listAcconts.add(mapAccont);
+  String content = json.encode(listAcconts);
+
+  String url = "https://api.github.com/gists/6bfdfa496b5dae5a395c318ae9a4189d";
+  Response response = await post(
+    Uri.parse(url),
+    headers: {"Authorization": "Bearer $githubApiKey"},
+    body: json.encode({
+      "description": "account.json",
+      "public": true,
+      "files": {
+        "account.json": {"content": content},
+      },
+    }),
+  );
+  print(response.statusCode);
 }
